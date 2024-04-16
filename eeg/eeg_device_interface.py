@@ -1,3 +1,4 @@
+import threading
 import time
 
 from brainaccess import core
@@ -23,6 +24,7 @@ class EEGDeviceInterface:
         self._device_name = device_name
         self._adapter_number = adapter_number
         self._device_features = DeviceFeatures()
+        self._lock = threading.Lock()
 
     def close(self):
         self.disconnect()
@@ -30,62 +32,68 @@ class EEGDeviceInterface:
         core.close()
 
     def connect(self):
-        self._scan_for_devices()
-        status = self._manager.connect(self._get_device_index())
-        if status == 1:
-            raise EEGDeviceInterfaceError("Connection failed")
-        if status == 2:
-            raise EEGDeviceInterfaceError("Stream is incompatible. Update the firmware.")
+        with self._lock:
+            self._scan_for_devices()
+            status = self._manager.connect(self._get_device_index())
+            if status == 1:
+                raise EEGDeviceInterfaceError("Connection failed")
+            if status == 2:
+                raise EEGDeviceInterfaceError("Stream is incompatible. Update the firmware.")
 
     def disconnect(self):
-        self._manager.disconnect()
+        with self._lock:
+            self._manager.disconnect()
 
     """ Device status and hardware information """
 
     def get_sample_frequency(self) -> int:
-        if self._manager.is_connected():
-            return self._manager.get_sample_frequency()
-        raise EEGDeviceInterfaceError("Device was not connected yet")
+        with self._lock:
+            if self._manager.is_connected():
+                return self._manager.get_sample_frequency()
+            raise EEGDeviceInterfaceError("Device was not connected yet")
 
     def get_device_info(self) -> DeviceInfo:
-        if self._manager.is_connected():
-            info = self._manager.get_device_info()
-            device_model = info.device_model
-            hw_version = DeviceVersion(
-                major=info.hardware_version.major,
-                minor=info.hardware_version.minor,
-                patch=info.hardware_version.patch,
-            )
-            sw_version = DeviceVersion(
-                major=info.firmware_version.major,
-                minor=info.firmware_version.minor,
-                patch=info.firmware_version.patch,
-            )
-            serial_number = info.serial_number
+        with self._lock:
+            if self._manager.is_connected():
+                info = self._manager.get_device_info()
+                device_model = info.device_model
+                hw_version = DeviceVersion(
+                    major=info.hardware_version.major,
+                    minor=info.hardware_version.minor,
+                    patch=info.hardware_version.patch,
+                )
+                sw_version = DeviceVersion(
+                    major=info.firmware_version.major,
+                    minor=info.firmware_version.minor,
+                    patch=info.firmware_version.patch,
+                )
+                serial_number = info.serial_number
 
-            return DeviceInfo(
-                device_model=device_model,
-                hardware_version=hw_version,
-                software_version=sw_version,
-                serial_number=serial_number,
-            )
-        raise EEGDeviceInterfaceError("Device was not connected yet")
+                return DeviceInfo(
+                    device_model=device_model,
+                    hardware_version=hw_version,
+                    software_version=sw_version,
+                    serial_number=serial_number,
+                )
+            raise EEGDeviceInterfaceError("Device was not connected yet")
 
     def get_battery_status(self) -> BatteryStatus:
-        if self._manager.is_connected():
-            info = self._manager.get_battery_info()
-            return BatteryStatus(
-                level=info.level,
-                is_charging=info.is_charging,
-                is_charger_connected=info.is_charger_connected,
-            )
-        raise EEGDeviceInterfaceError("Device was not connected yet")
+        with self._lock:
+            if self._manager.is_connected():
+                info = self._manager.get_battery_info()
+                return BatteryStatus(
+                    level=info.level,
+                    is_charging=info.is_charging,
+                    is_charger_connected=info.is_charger_connected,
+                )
+            raise EEGDeviceInterfaceError("Device was not connected yet")
 
     """ Cap-related utilities and validation functions """
 
     def electrode_count_matches_cap(self, cap: Cap) -> bool:
-        self._update_device_features()
-        return len(cap.mapping) == self._device_features.electrode_count
+        with self._lock:
+            self._update_device_features()
+            return len(cap.mapping) == self._device_features.electrode_count
 
     """ Device connection """
 
