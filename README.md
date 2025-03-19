@@ -1,0 +1,2 @@
+### Requrements ###
+bluetoothctl installed
