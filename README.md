@@ -1,1 +1,2 @@
-Just init
+### Requrements ###
+bluetoothctl installed

@@ -1,17 +1,17 @@
-[project]
+[tool.poetry]
 name = "p300-detector"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "niewyspany", email = "triss@tuta.io"}
-]
+authors = ["niewyspany <triss@tuta.io>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "matplotlib",
-    "tk",
-    "brainaccess @ file:///home/coyote/Projects/BrainAccessSDK-linux/python_api"
-]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+matplotlib = "^3.8"
+tk = "*"
+brainaccess = { path = "../BrainAccessSDK-linux/python_api" }
+pyqt6 = "^6.8.1"
+pyqtgraph = "^0.13.7"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

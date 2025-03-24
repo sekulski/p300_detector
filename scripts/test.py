@@ -14,24 +14,26 @@ import time
 from brainaccess.utils import acquisition
 from brainaccess.core.eeg_manager import EEGManager
 
+from scripts.caps import mini_default_cap
+
 matplotlib.use("TKAgg", force=True)
 
 eeg = acquisition.EEG()
 
 # define electrode locations
-cap: dict = {
-    0: "Fp1",
-    1: "Fp2",
-    2: "O1",
-    3: "O2",
-}
+# cap: dict = {
+#     0: "Fp1",
+#     1: "Fp2",
+#     2: "O1",
+#     3: "O2",
+# }
 
 # define device name
-device_name = "BA MINI 0002"
+# device_name = "BA MINI 0002"
 
 # start EEG acquisition setup
 with EEGManager() as mgr:
-    eeg.setup(mgr, device_name=device_name, cap=cap)
+    eeg.setup(mgr, device_name=mini_default_cap.name, cap=mini_default_cap.mapping)
 
     # Start acquiring data
     eeg.start_acquisition()
