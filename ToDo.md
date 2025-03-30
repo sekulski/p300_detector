@@ -2,7 +2,7 @@
 
 ## 1. GUI
 
-### 1.0 – Wybór biblioteki GUI
+### 1.0 – Wybór biblioteki GUI - Done
 
 - [ ] Zastanowić się nad wyborem biblioteki:
   - PyQt6 + pyqtgraph <- wybrana 
@@ -10,12 +10,17 @@
 
 ---
 
-### 1.1 – Lista urządzeń EEG
+### 1.1 – Lista urządzeń EEG - Done
 
 - [ ] Przycisk: `Scan available devices`
 - [ ] Wyświetlenie listy dostępnych urządzeń do wyboru
+- [ ] Opcja zmiany stanu połączenia
 
 ---
+
+### 1.1.1 - Opcja EEG devices only
+- [ ] Domyślnie włączona
+- [ ] Odfiltrowuje nam devices które nie są EEG
 
 ### 1.2 – Informacje o wybranym urządzeniu
 
