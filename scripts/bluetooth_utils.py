@@ -1,6 +1,5 @@
-from enum import StrEnum
 import subprocess
-import time
+from enum import StrEnum
 
 
 class ConnectionState(StrEnum):
@@ -26,7 +25,9 @@ class DevicesManager:
         output = ""
 
         for device in self._devices:
-            output+=f"{device.mac}    {device.description}    {device.connection_state}\n"
+            output += (
+                f"{device.mac}    {device.description}    {device.connection_state}\n"
+            )
 
         return output
 
@@ -43,37 +44,30 @@ class DevicesManager:
 
     def connect_device(self, mac: str) -> None:
         # ToDo: Check whether succeed. Update connection info
-        result = subprocess.run(
-            ["bluetoothctl", "connect", mac],
-            capture_output=True,
-            text=True
-        )
+        subprocess.run(["bluetoothctl", "connect", mac], capture_output=True, text=True)
 
     def disconnect_device(self, mac: str) -> None:
         # ToDo: Check whether succeed. Update connection info
-        result = subprocess.run(
-            ["bluetoothctl", "disconnect", mac],
-            capture_output=True,
-            text=True
+        subprocess.run(
+            ["bluetoothctl", "disconnect", mac], capture_output=True, text=True
         )
-
 
     def _get_all_available_device_descriptions(self) -> None:
         self._devices.clear()
         result = subprocess.run(
-            ["bluetoothctl", "devices"],
-            capture_output=True,
-            text=True
+            ["bluetoothctl", "devices"], capture_output=True, text=True
         )
 
         if result.returncode:
             print("Cannot scan bluetooth devices")
 
-        for description in result.stdout.strip().split('\n'):
+        for description in result.stdout.strip().split("\n"):
             detected_mac = self._extract_mac(text=description)
             device_name = self._extract_device_name(text=description)
             # ToDo: Add MAC validation
-            self._devices.append(DeviceState(detected_mac, device_name, ConnectionState.UNKNOWN))
+            self._devices.append(
+                DeviceState(detected_mac, device_name, ConnectionState.UNKNOWN)
+            )
 
     def _extract_mac(self, text: str) -> str:
         mac_pos = 1
@@ -87,15 +81,13 @@ class DevicesManager:
         device_name_pos = 2
         parts = text.split(" ")
         if len(parts) >= 2 and parts[0] == "Device":
-            return " ".join(parts[device_name_pos:len(parts)])
+            return " ".join(parts[device_name_pos : len(parts)])
 
         return ""
 
     def _is_device_connected(self, mac: str) -> bool:
         result = subprocess.run(
-            ["bluetoothctl", "info", mac],
-            capture_output=True,
-            text=True
+            ["bluetoothctl", "info", mac], capture_output=True, text=True
         )
         return "Connected: yes" in result.stdout
 
@@ -105,4 +97,3 @@ class DevicesManager:
                 device.connection_state = ConnectionState.CONNECTED
             else:
                 device.connection_state = ConnectionState.DISCONNECTED
-

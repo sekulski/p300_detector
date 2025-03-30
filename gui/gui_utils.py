@@ -13,4 +13,3 @@ def get_centered_geometry(width: int, height: int) -> QRect:
     y = center_y - (height // 2)
 
     return QRect(x, y, width, height)
-

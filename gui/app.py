@@ -1,3 +1,5 @@
+import sys
+
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
@@ -6,14 +8,13 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QMainWindow,
     QPushButton,
-    QWidget,
     QVBoxLayout,
+    QWidget,
 )
-import time
 
-import sys
 from gui.gui_utils import get_centered_geometry
-from scripts.bluetooth_utils import DevicesManager, ConnectionState
+from scripts.bluetooth_utils import ConnectionState, DevicesManager
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -66,8 +67,13 @@ class MainWindow(QMainWindow):
         devices = self.bt_devices_manager.get_devices_info()
 
         for device in devices:
-            item = QListWidgetItem(f"{device.mac}    {device.description}    {device.connection_state}")
-            item.setData(Qt.ItemDataRole.UserRole, {"mac": device.mac, "status": device.connection_state})
+            item = QListWidgetItem(
+                f"{device.mac}    {device.description}    {device.connection_state}"
+            )
+            item.setData(
+                Qt.ItemDataRole.UserRole,
+                {"mac": device.mac, "status": device.connection_state},
+            )
             self.bt_devices_info.append(item)
             self.devices_list.addItem(item)
 
@@ -79,7 +85,7 @@ class MainWindow(QMainWindow):
         if metadata:
             mac = metadata.get("mac")
             status = metadata.get("status")
-            if (status == ConnectionState.CONNECTED):
+            if status == ConnectionState.CONNECTED:
                 self.bt_devices_manager.disconnect_device(mac)
             else:
                 self.bt_devices_manager.connect_device(mac)
