@@ -1,4 +1,5 @@
 from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QListWidget,
@@ -27,6 +28,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(title)
         self.setGeometry(centre)
         self.setMinimumSize(QSize(win_width, win_height))
+
+        # Icon
+        self.setWindowIcon(QIcon("resources/icon.png"))
 
         # Widgets
         self.button_detect_devices: QPushButton = QPushButton("Detect bt devices")
