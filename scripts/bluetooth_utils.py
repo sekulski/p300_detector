@@ -65,9 +65,10 @@ class DevicesManager:
             detected_mac = self._extract_mac(text=description)
             device_name = self._extract_device_name(text=description)
             # ToDo: Add MAC validation
-            self._devices.append(
-                DeviceState(detected_mac, device_name, ConnectionState.UNKNOWN)
-            )
+            if self._is_it_eeg_device(name=device_name):
+                self._devices.append(
+                    DeviceState(detected_mac, device_name, ConnectionState.UNKNOWN)
+                )
 
     def _extract_mac(self, text: str) -> str:
         mac_pos = 1
@@ -90,6 +91,10 @@ class DevicesManager:
             ["bluetoothctl", "info", mac], capture_output=True, text=True
         )
         return "Connected: yes" in result.stdout
+
+    def _is_it_eeg_device(self, name: str) -> bool:
+        target_names = ["BA MINI"]
+        return name in target_names or any(sub in name for sub in target_names)
 
     def _get_connection_states(self) -> None:
         for device in self._devices:
