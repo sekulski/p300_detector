@@ -1,4 +1,5 @@
 import subprocess
+import re
 from enum import StrEnum
 
 
@@ -64,8 +65,7 @@ class DevicesManager:
         for description in result.stdout.strip().split("\n"):
             detected_mac = self._extract_mac(text=description)
             device_name = self._extract_device_name(text=description)
-            # ToDo: Add MAC validation
-            if self._is_it_eeg_device(name=device_name):
+            if self._is_it_eeg_device(name=device_name) and self._is_valid_mac_address(mac=detected_mac):
                 self._devices.append(
                     DeviceState(detected_mac, device_name, ConnectionState.UNKNOWN)
                 )
@@ -77,6 +77,10 @@ class DevicesManager:
             return parts[mac_pos]
 
         return ""
+
+    def _is_valid_mac_address(self, mac: str) -> bool:
+        mac_regex = re.compile(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+        return bool(mac_regex.match(mac))
 
     def _extract_device_name(self, text: str) -> str:
         device_name_pos = 2
