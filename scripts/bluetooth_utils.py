@@ -1,5 +1,5 @@
-import subprocess
 import re
+import subprocess
 from enum import StrEnum
 
 
@@ -65,7 +65,9 @@ class DevicesManager:
         for description in result.stdout.strip().split("\n"):
             detected_mac = self._extract_mac(text=description)
             device_name = self._extract_device_name(text=description)
-            if self._is_it_eeg_device(name=device_name) and self._is_valid_mac_address(mac=detected_mac):
+            if self._is_it_eeg_device(name=device_name) and self._is_valid_mac_address(
+                mac=detected_mac
+            ):
                 self._devices.append(
                     DeviceState(detected_mac, device_name, ConnectionState.UNKNOWN)
                 )
@@ -79,7 +81,9 @@ class DevicesManager:
         return ""
 
     def _is_valid_mac_address(self, mac: str) -> bool:
-        mac_regex = re.compile(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+        mac_regex = re.compile(
+            r"^(?:[0-9A-Fa-f]{2}([:-]))(?:[0-9A-Fa-f]{2}\1){4}[0-9A-Fa-f]{2}$"
+        )
         return bool(mac_regex.match(mac))
 
     def _extract_device_name(self, text: str) -> str:
