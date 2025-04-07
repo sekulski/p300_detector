@@ -3,6 +3,8 @@ from brainaccess.core.eeg_manager import EEGManager
 from brainaccess.utils.exceptions import BrainAccessException
 
 from eeg.battery_status import BatteryStatus
+from eeg.caps import Cap
+from eeg.device_features import DeviceFeatures
 
 
 class EEGDeviceInterfaceError(Exception):
@@ -16,6 +18,7 @@ class EEGDeviceInterface:
         self.manager = EEGManager()
         self.device_name = device_name
         self.adapter_number = adapter_number
+        self.device_features = DeviceFeatures()
 
     def __del__(self):
         self.disconnect()
@@ -30,6 +33,12 @@ class EEGDeviceInterface:
 
     def disconnect(self):
         self.manager.disconnect()
+
+    """ Cap-related utilities and validation functions """
+
+    def electrode_count_matches_cap(self, cap: Cap) -> bool:
+        self._update_device_features()
+        return len(cap.mapping) == self.device_features.electrode_count
 
     """ Battery management """
 
@@ -56,3 +65,12 @@ class EEGDeviceInterface:
                 return device_index
 
         raise EEGDeviceInterfaceError("Device not found")
+
+    """ Utils """
+
+    def _update_device_features(self) -> None:
+        features = self.manager.get_device_features()
+        self.device_features.has_gyro = features.has_gyro()
+        self.device_features.has_accel = features.has_accel()
+        self.device_features.is_bipolar = features.is_bipolar()
+        self.device_features.electrode_count = features.electrode_count()
