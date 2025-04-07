@@ -5,6 +5,8 @@ from brainaccess.utils.exceptions import BrainAccessException
 from eeg.battery_status import BatteryStatus
 from eeg.caps import Cap
 from eeg.device_features import DeviceFeatures
+from eeg.device_info import DeviceInfo
+from eeg.device_version import DeviceVersion
 
 
 class EEGDeviceInterfaceError(Exception):
@@ -34,22 +36,52 @@ class EEGDeviceInterface:
     def disconnect(self):
         self.manager.disconnect()
 
+    """ Device status and hardware information """
+
+    def get_sample_frequency(self) -> int:
+        if self.manager.is_connected():
+            return self.manager.get_sample_frequency()
+        raise EEGDeviceInterfaceError("Device was not connected yet")
+
+    def get_device_info(self) -> DeviceInfo:
+        if self.manager.is_connected():
+            info = self.manager.get_device_info()
+            device_model = info.device_model
+            hw_version = DeviceVersion(
+                major=info.hardware_version.major,
+                minor=info.hardware_version.minor,
+                patch=info.hardware_version.patch,
+            )
+            sw_version = DeviceVersion(
+                major=info.firmware_version.major,
+                minor=info.firmware_version.minor,
+                patch=info.firmware_version.patch,
+            )
+            serial_number = info.serial_number
+
+            return DeviceInfo(
+                device_model=device_model,
+                hardware_version=hw_version,
+                software_version=sw_version,
+                serial_number=serial_number,
+            )
+        raise EEGDeviceInterfaceError("Device was not connected yet")
+
+    def get_battery_status(self) -> BatteryStatus:
+        if self.manager.is_connected():
+            info = self.manager.get_battery_info()
+            return BatteryStatus(
+                level=info.level,
+                is_charging=info.is_charging,
+                is_charger_connected=info.is_charger_connected,
+            )
+        raise EEGDeviceInterfaceError("Device was not connected yet")
+
     """ Cap-related utilities and validation functions """
 
     def electrode_count_matches_cap(self, cap: Cap) -> bool:
         self._update_device_features()
         return len(cap.mapping) == self.device_features.electrode_count
-
-    """ Battery management """
-
-    def get_battery_status(self) -> BatteryStatus:
-        # ToDo: Check if there is a connection do the device
-        info = self.manager.get_battery_info()
-        return BatteryStatus(
-            level=info.level,
-            is_charging=info.is_charging,
-            is_charger_connected=info.is_charger_connected,
-        )
 
     """ Device connection """
 
