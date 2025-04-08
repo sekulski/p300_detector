@@ -1,3 +1,5 @@
+import time
+
 from brainaccess import core
 from brainaccess.core.eeg_manager import EEGManager
 from brainaccess.utils.exceptions import BrainAccessException
@@ -22,8 +24,10 @@ class EEGDeviceInterface:
         self._adapter_number = adapter_number
         self._device_features = DeviceFeatures()
 
-    def __del__(self):
+    def close(self):
         self.disconnect()
+        time.sleep(1)  # TODO: Nasty workaround to allow BLE callbacks to finish before shutdown
+        core.close()
 
     def connect(self):
         self._scan_for_devices()
