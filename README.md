@@ -40,6 +40,29 @@ Alternatively, you can use a wrapper script or `make` task to automate this if n
 
 ---
 
+## Known SDK Issues
+
+### Incorrect library name resolution (`liblibbacore.so.so`)
+
+In some cases, the SDK attempts to load `libbacore.so` using an incorrect name: `liblibbacore.so.so`.
+This typically happens when the SDK automatically prepends `lib` and appends `.so` to a library name that already includes those parts.
+
+#### Workaround
+
+Create a symbolic link in the SDK's library directory:
+
+```bash
+ln -s libbacore.so liblibbacore.so.so
+```
+
+Also, ensure that the SDK path is available to the dynamic linker:
+
+```bash
+export LD_LIBRARY_PATH=/path/to/BrainAccessSDK:$LD_LIBRARY_PATH
+```
+
+---
+
 ## Pre-commit Hooks
 
 This project uses [pre-commit](https://pre-commit.com) to enforce formatting and basic linting. Hooks include:
