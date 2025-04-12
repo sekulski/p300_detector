@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Cache Poetry dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pypoetry
+          ~/.cache/pip
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install Poetry via Action
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: '2.1.1'
+
+    - name: Cache BrainAccess SDK
+      id: cache-brainaccess-sdk
+      uses: actions/cache@v3
+      with:
+        path: .brainaccess/BrainAccessSDK-linux
+        key: ${{ runner.os }}-brainaccesssdk-3.5.0
+
+    - name: Download and extract BrainAccess SDK (if not cached)
+      if: steps.cache-brainaccess-sdk.outputs.cache-hit != 'true'
+      run: |
+        echo "Downloading BrainAccess SDK..."
+        mkdir -p .brainaccess/BrainAccessSDK-linux
+        curl -L https://www.brainaccess.ai/wp-content/uploads/downloads/BrainAccessSDK-linux.zip -o sdk.zip
+        unzip sdk.zip -d .brainaccess/BrainAccessSDK-linux
+
+    - name: Create symlink to SDK one level up
+      run: |
+        ln -sfn "$GITHUB_WORKSPACE/.brainaccess/BrainAccessSDK-linux" "$GITHUB_WORKSPACE/../BrainAccessSDK-linux"
+
+    - name: Install dependencies
+      run: |
+        poetry install
+
+    - name: Run tests
+      run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        poetry run pytest
