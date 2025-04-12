@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Poetry via Action
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: '2.1.1'
+
+    - name: Download and extract BrainAccess SDK one level above
+      run: |
+        echo "Extracting SDK to parent directory..."
+        mkdir -p $GITHUB_WORKSPACE/../BrainAccessSDK-linux
+        curl -L https://www.brainaccess.ai/wp-content/uploads/downloads/BrainAccessSDK-linux.zip -o sdk.zip
+        unzip sdk.zip -d $GITHUB_WORKSPACE/../BrainAccessSDK-linux
+
+    - name: Install dependencies
+      run: |
+        poetry install
+
+    - name: Run tests
+      run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        poetry run pytest
