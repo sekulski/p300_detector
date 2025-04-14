@@ -1,0 +1,32 @@
+name: "📋 Tech Spike"
+description: Investigate a technical topic or explore a possible solution
+title: "📋 [SPIKE] - <short title>"
+labels: ["tech spike"]
+
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: "Goal"
+      description: What do you want to learn or figure out?
+      placeholder: Define the goal of this investigation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: "Use Case / Why"
+      description: Why is this spike needed? Who benefits?
+      placeholder: Describe the context or motivation behind it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Notes / Initial Thoughts"
+      description: Optional: early ideas, tools to try, or related links.
+      placeholder: Optional
+    validations:
+      required: false
