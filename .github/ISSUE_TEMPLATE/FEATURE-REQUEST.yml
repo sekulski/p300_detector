@@ -1,0 +1,41 @@
+name: "🚀 Feature Request"
+description: Suggest a new feature
+title: "🚀 [REQUEST] - <short title>"
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Summary"
+      description: What feature do you want to see?
+      placeholder: Describe your idea in a few sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: "Use Case"
+      description: Why is this feature useful?
+      placeholder: Explain how or why you'd use it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: drawbacks
+    attributes:
+      label: "Potential Drawbacks"
+      description: Any risks or downsides?
+      placeholder: Optional - e.g. complexity, performance hit
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Additional Info"
+      description: Links, examples, related issues
+      placeholder: Optional
+    validations:
+      required: false
