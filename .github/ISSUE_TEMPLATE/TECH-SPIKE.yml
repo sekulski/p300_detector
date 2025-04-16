@@ -26,7 +26,7 @@ body:
     id: notes
     attributes:
       label: "Notes / Initial Thoughts"
-      description: Optional: early ideas, tools to try, or related links.
+      description: Early ideas, tools to try, or related links.
       placeholder: Optional
     validations:
       required: false
