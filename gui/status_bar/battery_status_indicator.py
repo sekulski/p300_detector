@@ -1,9 +1,11 @@
 import enum
 
-from battery_status import BatteryStatus
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel
+
+from eeg.battery_status import BatteryStatus
+from eeg.eeg_device_interface import EEGDeviceInterface
 
 
 class BatteryLevel(enum.Enum):
@@ -21,7 +23,7 @@ class ChargingStatus(enum.Enum):
     CHARGING = ("\ue55b", "Charging")
 
 
-def _get_battery_level(value: int):
+def _get_battery_level(value: int) -> BatteryLevel:
     if value < 10:
         return BatteryLevel.L0
     elif value < 30:
@@ -33,7 +35,7 @@ def _get_battery_level(value: int):
     return BatteryLevel.L100
 
 
-def _get_charger_status(is_charging, is_charger_connected):
+def _get_charger_status(is_charging, is_charger_connected) -> ChargingStatus:
     if not is_charger_connected:
         return ChargingStatus.DISCONNECTED
     elif is_charging:
@@ -66,7 +68,7 @@ class BatteryStatusUi(QLabel):
         if self.timer:
             self.timer.stop()
 
-    def start_measurement(self, manager):
+    def start_measurement(self, manager: EEGDeviceInterface):
         self.manager = manager
         self.timer = QTimer()
         self.timer.timeout.connect(lambda: self.set_value(self.manager.get_battery_status()))

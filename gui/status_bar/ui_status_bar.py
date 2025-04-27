@@ -3,11 +3,11 @@ from typing import Optional
 
 from PyQt6.QtGui import QFont, QFontDatabase
 from PyQt6.QtWidgets import QLabel, QStatusBar
-from status_bar.battery_status_indicator import BatteryStatusUi
-from status_bar.hardvare_info_status_indicator import HardwareStatusIndicator
 
 from eeg.device_info import DeviceInfo
 from eeg.eeg_device_interface import EEGDeviceInterface
+from gui.status_bar.battery_status_indicator import BatteryStatusUi
+from gui.status_bar.hardvare_info_status_indicator import HardwareStatusIndicator
 
 
 class UiStatusBar(QStatusBar):
@@ -19,14 +19,13 @@ class UiStatusBar(QStatusBar):
         self.device_info = DeviceInfo()
         self.setContentsMargins(10, 5, 10, 5)
 
-        # Load FA font
         font_path = Path(__file__).resolve().parent / "../../resources/fa-solid-900.ttf"
         font_id = QFontDatabase.addApplicationFont(str(font_path))
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         self.fa_font = QFont(font_family)
         self.fa_font.setPointSize(16)
 
-        self._setUpConnectionIndicator()
+        self._set_up_connection_indicator()
         self.battery_status = BatteryStatusUi(self.fa_font)
         self.addPermanentWidget(self.battery_status)
         self.hardware_icon = HardwareStatusIndicator(self.fa_font)
@@ -50,7 +49,7 @@ class UiStatusBar(QStatusBar):
         self.conn_icon.setText(icon_unicode)
         self.conn_icon.setToolTip(tooltip)
 
-    def _setUpConnectionIndicator(self):
+    def _set_up_connection_indicator(self):
         self.conn_icon = QLabel()
         self.conn_icon.setFont(self.fa_font)
         self.addPermanentWidget(self.conn_icon)

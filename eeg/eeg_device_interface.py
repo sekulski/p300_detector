@@ -1,4 +1,5 @@
 import time
+from typing import Callable, Union
 
 from brainaccess import core
 from brainaccess.core.eeg_manager import EEGManager
@@ -110,3 +111,6 @@ class EEGDeviceInterface:
         self._device_features.has_accel = features.has_accel()
         self._device_features.is_bipolar = features.is_bipolar()
         self._device_features.electrode_count = features.electrode_count()
+
+    def set_callback_battery(self, callback: Union[Callable, None] = None) -> None:
+        self._manager.set_callback_battery(callback)

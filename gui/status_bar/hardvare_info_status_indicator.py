@@ -1,18 +1,31 @@
-from device_info import DeviceInfo
 from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout
+
+from eeg.device_info import DeviceInfo
 
 
 class HardwareStatusIndicator(QLabel):
     def __init__(self, font: QFont):
         super().__init__()
-        self.connected = False
         self.name = ""
         self.mac = ""
         self.setFont(font)
         self.setText("\uf2db")  # chip
-        #   tooltip frame
+        self._setup_tooltip()
+
+    def updated_data(self, info: DeviceInfo, connected: bool):
+        self.label_status_label.setText(
+            "Status: Connected" if connected else "Status: Disconnected"
+        )
+        self.mac_label.setText("MAC: " + self.mac)
+        self.name_label.setText("Name: " + self.name)
+        self.model_label.setText("Model: " + str(info.device_model))
+        self.sw_label.setText("SW: " + str(info.software_version))
+        self.hw_label.setText("HW: " + str(info.hardware_version))
+        self.serial_label.setText("Serial: " + str(info.serial_number))
+
+    def _setup_tooltip(self):
         self.tooltip = QFrame()
         layout = QVBoxLayout()
         layout.setContentsMargins(8, 6, 8, 6)  # padding
@@ -23,9 +36,7 @@ class HardwareStatusIndicator(QLabel):
         self.tooltip.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
 
         # Add labels
-        self.label_status_label = QLabel(
-            "Status: Connected" if self.connected else "Status: Disconnected"
-        )
+        self.label_status_label = QLabel("Status: Disconnected")
 
         self.mac_label = QLabel("MAC: ")
         self.name_label = QLabel("Name: ")
@@ -48,14 +59,3 @@ class HardwareStatusIndicator(QLabel):
         pos = self.mapToGlobal(self.rect().bottomLeft())
         self.tooltip.move(pos + QPoint(0, 8))
         self.tooltip.show()
-
-    def updated_data(self, info: DeviceInfo, connected: bool):
-        self.label_status_label.setText(
-            "Status: Connected" if self.connected else "Status: Disconnected"
-        )
-        self.mac_label.setText("MAC: " + self.mac)
-        self.name_label.setText("Name: " + self.name)
-        self.model_label.setText("Model: " + str(info.device_model))
-        self.sw_label.setText("SW: " + str(info.software_version))
-        self.hw_label.setText("HW: " + str(info.hardware_version))
-        self.serial_label.setText("Serial: " + str(info.serial_number))
