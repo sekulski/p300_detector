@@ -95,7 +95,7 @@ class DevicesManager:
         return "Connected: yes" in result.stdout
 
     def _is_it_eeg_device(self, name: str) -> bool:
-        target_names = ["BA MINI"]
+        target_names = ["BA MINI", "BA HALO"]
         return name in target_names or any(sub in name for sub in target_names)
 
     def _get_connection_states(self) -> None:

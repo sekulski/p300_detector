@@ -174,16 +174,14 @@ class MainWindow(QMainWindow):
     def toggle_device_connection(self, item):
         metadata = item.data(Qt.ItemDataRole.UserRole)
         if metadata:
-            mac = metadata.get("mac")
             status = metadata.get("status")
+            description = metadata.get("description")
             if status == ConnectionState.CONNECTED:
-                self.bt_devices_manager.disconnect_device(mac)
+                self.manager.disconnect()
                 self.status_bar.set_connection_status(False, self.manager)
             else:
-                self.bt_devices_manager.connect_device(mac)
-                # TODO fixit
-                self.manager = EEGDeviceInterface("BA MINI 002", 0)
-
+                self.manager = EEGDeviceInterface(description, 0)
+                self.manager.connect()
                 self.status_bar.set_connection_status(True, self.manager)
 
         self.update_devices_list()

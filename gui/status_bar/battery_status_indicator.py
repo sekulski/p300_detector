@@ -61,7 +61,7 @@ class BatteryStatusUi(QLabel):
 
     def _set_icons(self, level: BatteryLevel, charging_status: ChargingStatus):
         self.setText(charging_status.value[0] + " " + level.value[0])
-        self.setToolTip(charging_status.value[1] + "\n" + level.value[1])
+        self.setToolTip("Charger: " + charging_status.value[1] + "\n" + level.value[1])
 
     def stop_measurement(self):
         self._set_icons(BatteryLevel.UNKNOWN, ChargingStatus.DISCONNECTED)
