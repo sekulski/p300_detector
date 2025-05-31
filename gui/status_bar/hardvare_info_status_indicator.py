@@ -8,16 +8,14 @@ from eeg.device_info import DeviceInfo
 class HardwareStatusIndicator(QLabel):
     def __init__(self, font: QFont):
         super().__init__()
-        self.name = ""
-        self.mac = ""
         self.setFont(font)
         self.setText("\uf2db")  # chip
         self._setup_tooltip()
 
-    def updated_data(self, info: DeviceInfo, connected: bool):
+    def updated_data(self, device_name: str, mac: str, info: DeviceInfo, connected: bool):
         self.status_label.setText("Status: Connected" if connected else "Status: Disconnected")
-        self.mac_label.setText("MAC: " + self.mac)
-        self.name_label.setText("Name: " + self.name)
+        self.mac_label.setText("MAC: " + mac)
+        self.name_label.setText("Name: " + device_name)
         self.model_label.setText("Model: " + str(info.device_model))
         self.sw_label.setText("SW: " + str(info.software_version))
         self.hw_label.setText("HW: " + str(info.hardware_version))
