@@ -15,9 +15,7 @@ class HardwareStatusIndicator(QLabel):
         self._setup_tooltip()
 
     def updated_data(self, info: DeviceInfo, connected: bool):
-        self.label_status_label.setText(
-            "Status: Connected" if connected else "Status: Disconnected"
-        )
+        self.status_label.setText("Status: Connected" if connected else "Status: Disconnected")
         self.mac_label.setText("MAC: " + self.mac)
         self.name_label.setText("Name: " + self.name)
         self.model_label.setText("Model: " + str(info.device_model))
@@ -36,21 +34,20 @@ class HardwareStatusIndicator(QLabel):
         self.tooltip.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
 
         # Add labels
-        self.label_status_label = QLabel("Status: Disconnected")
-
-        self.mac_label = QLabel("MAC: ")
+        self.status_label = QLabel("Status: Disconnected")
         self.name_label = QLabel("Name: ")
+        self.mac_label = QLabel("MAC: ")
         self.model_label = QLabel("Model: ")
         self.sw_label = QLabel("SW: ")
         self.hw_label = QLabel("HW: ")
         self.serial_label = QLabel("Serial: ")
-        layout.addWidget(self.mac_label)
+        layout.addWidget(self.status_label)
         layout.addWidget(self.name_label)
+        layout.addWidget(self.mac_label)
         layout.addWidget(self.model_label)
         layout.addWidget(self.sw_label)
         layout.addWidget(self.hw_label)
         layout.addWidget(self.serial_label)
-        layout.addWidget(self.label_status_label)
         self.setMouseTracking(True)
         self.mouseMoveEvent = self._show_hardware_tooltip
         self.leaveEvent = lambda event: self.tooltip.hide()
