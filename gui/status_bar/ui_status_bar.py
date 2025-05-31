@@ -45,7 +45,7 @@ class UiStatusBar(QStatusBar):
 
         self.hardware_icon.updated_data(self.device_info, connected)
         icon_unicode = "\uf1eb" if connected else "\uf127"  # WiFi or Ban
-        tooltip = "Connected" if connected else "Disconnected"
+        tooltip = "Device: Connected" if connected else "Device: Disconnected"
         self.conn_icon.setText(icon_unicode)
         self.conn_icon.setToolTip(tooltip)
 
