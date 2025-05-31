@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from PyQt6.QtCore import QSize, Qt
@@ -7,26 +8,34 @@ from PyQt6.QtWidgets import (
     QButtonGroup,
     QComboBox,
     QGroupBox,
+    QHBoxLayout,
     QLabel,
     QListWidget,
     QListWidgetItem,
     QMainWindow,
     QPushButton,
     QRadioButton,
-    QHBoxLayout,
     QVBoxLayout,
     QWidget,
 )
-from mne.datasets.brainstorm.bst_raw import description
+from status_bar.ui_status_bar import UiStatusBar
 
 from eeg.caps_manager import CapManager
+from eeg.eeg_device_interface import EEGDeviceInterface
 from gui.gui_utils import get_centered_geometry
 from scripts.bluetooth_utils import ConnectionState, DevicesManager
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.manager = None
+        logging.basicConfig(level=logging.DEBUG)
+
+        self.status_bar = UiStatusBar()
+        self.setStatusBar(self.status_bar)
 
         self.bt_devices_manager = DevicesManager()
         self.eeg_cap_manager = CapManager()
@@ -133,16 +142,29 @@ class MainWindow(QMainWindow):
         self.bt_devices_info.clear()
         self.devices_list.clear()
         devices = self.bt_devices_manager.get_devices_info()
+        logger.debug("GUI: update_devices_list - refresh controllers")
 
         for device in devices:
+            logger.debug("GUI: device add %s", device.description)
+
             item = QListWidgetItem(
                 f"{device.mac}    {device.description}    {device.connection_state}"
             )
             item.setData(
                 Qt.ItemDataRole.UserRole,
-                {"mac": device.mac, "status": device.connection_state, "description": device.description},
+                {
+                    "mac": device.mac,
+                    "status": device.connection_state,
+                    "description": device.description,
+                },
             )
-            self.bt_devices_info.append({ "mac": device.mac, "description": device.description, "status": device.connection_state })
+            self.bt_devices_info.append(
+                {
+                    "mac": device.mac,
+                    "description": device.description,
+                    "status": device.connection_state,
+                }
+            )
             self.devices_list.addItem(item)
             self.update_devices_radio_options_number()
 
@@ -152,12 +174,15 @@ class MainWindow(QMainWindow):
     def toggle_device_connection(self, item):
         metadata = item.data(Qt.ItemDataRole.UserRole)
         if metadata:
-            mac = metadata.get("mac")
             status = metadata.get("status")
+            description = metadata.get("description")
             if status == ConnectionState.CONNECTED:
-                self.bt_devices_manager.disconnect_device(mac)
+                self.manager.disconnect()
+                self.status_bar.set_connection_status(False, self.manager)
             else:
-                self.bt_devices_manager.connect_device(mac)
+                self.manager = EEGDeviceInterface(description, 0)
+                self.manager.connect()
+                self.status_bar.set_connection_status(True, self.manager)
 
         self.update_devices_list()
 
@@ -165,6 +190,7 @@ class MainWindow(QMainWindow):
         self.cap_list.clear()
         caps = self.eeg_cap_manager.get_caps_available_for_device(button.text())
         self.cap_list.addItems([cap.name for cap in caps])
+
 
 app = QApplication(sys.argv)
 window = MainWindow()

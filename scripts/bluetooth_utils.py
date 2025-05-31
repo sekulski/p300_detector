@@ -1,6 +1,9 @@
+import logging
 import re
 import subprocess
 from enum import StrEnum
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionState(StrEnum):
@@ -26,9 +29,7 @@ class DevicesManager:
         output = ""
 
         for device in self._devices:
-            output += (
-                f"{device.mac}    {device.description}    {device.connection_state}\n"
-            )
+            output += f"{device.mac}    {device.description}    {device.connection_state}\n"
 
         return output
 
@@ -49,20 +50,17 @@ class DevicesManager:
 
     def disconnect_device(self, mac: str) -> None:
         # ToDo: Check whether succeed. Update connection info
-        subprocess.run(
-            ["bluetoothctl", "disconnect", mac], capture_output=True, text=True
-        )
+        subprocess.run(["bluetoothctl", "disconnect", mac], capture_output=True, text=True)
 
     def _get_all_available_device_descriptions(self) -> None:
         self._devices.clear()
-        result = subprocess.run(
-            ["bluetoothctl", "devices"], capture_output=True, text=True
-        )
+        result = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True)
 
         if result.returncode:
-            print("Cannot scan bluetooth devices")
+            logger.error("Cannot scan bluetooth devices")
 
         for description in result.stdout.strip().split("\n"):
+            logger.debug("BT: device found %s", description)
             detected_mac = self._extract_mac(text=description)
             device_name = self._extract_device_name(text=description)
             if self._is_it_eeg_device(name=device_name) and self._is_valid_mac_address(
@@ -81,9 +79,7 @@ class DevicesManager:
         return ""
 
     def _is_valid_mac_address(self, mac: str) -> bool:
-        mac_regex = re.compile(
-            r"^(?:[0-9A-Fa-f]{2}([:-]))(?:[0-9A-Fa-f]{2}\1){4}[0-9A-Fa-f]{2}$"
-        )
+        mac_regex = re.compile(r"^(?:[0-9A-Fa-f]{2}([:-]))(?:[0-9A-Fa-f]{2}\1){4}[0-9A-Fa-f]{2}$")
         return bool(mac_regex.match(mac))
 
     def _extract_device_name(self, text: str) -> str:
@@ -95,13 +91,11 @@ class DevicesManager:
         return ""
 
     def _is_device_connected(self, mac: str) -> bool:
-        result = subprocess.run(
-            ["bluetoothctl", "info", mac], capture_output=True, text=True
-        )
+        result = subprocess.run(["bluetoothctl", "info", mac], capture_output=True, text=True)
         return "Connected: yes" in result.stdout
 
     def _is_it_eeg_device(self, name: str) -> bool:
-        target_names = ["BA MINI"]
+        target_names = ["BA MINI", "BA HALO"]
         return name in target_names or any(sub in name for sub in target_names)
 
     def _get_connection_states(self) -> None:
