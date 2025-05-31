@@ -18,11 +18,11 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from status_bar.ui_status_bar import UiStatusBar
 
 from eeg.caps_manager import CapManager
 from eeg.eeg_device_interface import EEGDeviceInterface
 from gui.gui_utils import get_centered_geometry
+from gui.status_bar.ui_status_bar import UiStatusBar
 from scripts.bluetooth_utils import ConnectionState, DevicesManager
 
 logger = logging.getLogger(__name__)
