@@ -37,7 +37,7 @@ poetry run some/path/to/file.py
 ```
 
 Alternatively, you can use a wrapper script or `make` task to automate this if needed.
-Now there is config, so if you run tests from project root catalog it should works
+The configuration is now in place, so running tests from the project root directory should work.
 
 ---
 
