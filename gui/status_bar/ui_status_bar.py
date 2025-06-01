@@ -13,8 +13,8 @@ from gui.status_bar.hardvare_info_status_indicator import HardwareStatusIndicato
 class UiStatusBar(QStatusBar):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.name = None
-        self.mac = None
+        self.name = ""
+        self.mac = ""
         self.connected = False
         self.device_info = DeviceInfo()
         self.setContentsMargins(10, 5, 10, 5)
@@ -38,14 +38,15 @@ class UiStatusBar(QStatusBar):
         if not connected:
             self.battery_status.stop_measurement()
             self.device_info = DeviceInfo()
-
         else:
             self.battery_status.start_measurement(manager)
             self.device_info = manager.get_device_info()
+            self.name = manager.get_device_name()
+            self.mac = manager.get_device_mac()
 
-        self.hardware_icon.updated_data(self.device_info, connected)
+        self.hardware_icon.updated_data(self.name, self.mac, self.device_info, connected)
         icon_unicode = "\uf1eb" if connected else "\uf127"  # WiFi or Ban
-        tooltip = "Connected" if connected else "Disconnected"
+        tooltip = "Device: Connected" if connected else "Device: Disconnected"
         self.conn_icon.setText(icon_unicode)
         self.conn_icon.setToolTip(tooltip)
 

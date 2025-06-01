@@ -84,6 +84,18 @@ class EEGDeviceInterface:
                 )
             raise EEGDeviceInterfaceError("Device was not connected yet")
 
+    def get_device_name(self) -> str:
+        with self._lock:
+            if self._manager.is_connected():
+                return self._device_name
+            return ""
+
+    def get_device_mac(self) -> str:
+        with self._lock:
+            if self._manager.is_connected():
+                return core.get_device_address(self._get_device_index())
+            return ""
+
     def get_battery_status(self) -> BatteryStatus:
         with self._lock:
             if self._manager.is_connected():
