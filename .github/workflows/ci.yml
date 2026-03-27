@@ -17,7 +17,9 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -38,25 +40,6 @@ jobs:
       uses: abatilo/actions-poetry@v2
       with:
         poetry-version: '2.1.1'
-
-    - name: Cache BrainAccess SDK
-      id: cache-brainaccess-sdk
-      uses: actions/cache@v3
-      with:
-        path: .brainaccess/BrainAccessSDK-linux
-        key: ${{ runner.os }}-brainaccesssdk-3.5.0
-
-    - name: Download and extract BrainAccess SDK (if not cached)
-      if: steps.cache-brainaccess-sdk.outputs.cache-hit != 'true'
-      run: |
-        echo "Downloading BrainAccess SDK..."
-        mkdir -p .brainaccess/BrainAccessSDK-linux
-        curl -L https://www.brainaccess.ai/wp-content/uploads/downloads/BrainAccessSDK-linux.zip -o sdk.zip
-        unzip sdk.zip -d .brainaccess/BrainAccessSDK-linux
-
-    - name: Create symlink to SDK one level up
-      run: |
-        ln -sfn "$GITHUB_WORKSPACE/.brainaccess/BrainAccessSDK-linux" "$GITHUB_WORKSPACE/../BrainAccessSDK-linux"
 
     - name: Install dependencies
       run: |

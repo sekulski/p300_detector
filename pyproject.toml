@@ -10,7 +10,7 @@ package-mode = false
 python = "^3.12"
 matplotlib = "^3.8"
 tk = "*"
-brainaccess = { path = "../BrainAccessSDK-linux/python_api" }
+brainaccess = { path = "external/BrainAccessSdk/python_api" }
 pyqt6 = "^6.8.1"
 pyqtgraph = "^0.13.7"
 

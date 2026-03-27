@@ -23,11 +23,6 @@ sudo apt install libxcb-cursor0 libxkbcommon-x11-0
 ## Requirements
 
 - `bluetoothctl` must be installed and available in your system.
-- The BrainAccess SDK must be available at such relative path:
-  ```
-  ../BrainAccessSDK-linux/python_api
-  ```
-  This path is referenced in `pyproject.toml` and used as a local dependency. Make sure the SDK is properly cloned or extracted there.
 
 ---
 
