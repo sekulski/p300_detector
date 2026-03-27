@@ -24,6 +24,8 @@ class EEGDeviceInterfaceError(Exception):
 class EEGDeviceInterface:
     def __init__(self, device_name: str, adapter_number: int):
         core.init()
+        core.config_set_adapter_index(adapter_number)
+
         self._manager = EEGManager()
         self._device_name = device_name
         self._adapter_number = adapter_number
@@ -31,6 +33,7 @@ class EEGDeviceInterface:
         self._eeg_data_recorder = EEGDataRecorder()
         self._eeg_data_ready = False
         self._lock = threading.Lock()
+        self._scanned_devices = []
 
     def close(self):
         print("Device will be disconnect")
@@ -41,11 +44,19 @@ class EEGDeviceInterface:
     def connect(self):
         with self._lock:
             self._scan_for_devices()
-            status = self._manager.connect(self._get_device_index())
+
+            if not any(self._device_name in dev.name for dev in self._scanned_devices):
+                raise EEGDeviceInterfaceError("Device not found")
+
+            status = self._manager.connect(self._device_name)
             if status == 1:
                 raise EEGDeviceInterfaceError("Connection failed")
             if status == 2:
                 raise EEGDeviceInterfaceError("Stream is incompatible. Update the firmware.")
+
+    def is_connected(self) -> bool:
+        with self._lock:
+            return self._manager.is_connected()
 
     def disconnect(self):
         with self._lock:
@@ -93,7 +104,9 @@ class EEGDeviceInterface:
     def get_device_mac(self) -> str:
         with self._lock:
             if self._manager.is_connected():
-                return core.get_device_address(self._get_device_index())
+                for dev in self._scanned_devices:
+                    if self._device_name in dev.name:
+                        return dev.mac_address
             return ""
 
     def get_battery_status(self) -> BatteryStatus:
@@ -180,16 +193,9 @@ class EEGDeviceInterface:
 
     def _scan_for_devices(self) -> None:
         try:
-            core.scan(self._adapter_number)
+            self._scanned_devices = core.scan()
         except BrainAccessException as e:
             raise EEGDeviceInterfaceError(f"Device scan failed due to SDK error: {e}") from e
-
-    def _get_device_index(self) -> int:
-        for device_index in range(core.get_device_count()):
-            if self._device_name in core.get_device_name(device_index):
-                return device_index
-
-        raise EEGDeviceInterfaceError("Device not found")
 
     """ Utils """
 
@@ -201,4 +207,5 @@ class EEGDeviceInterface:
         self._device_features.electrode_count = features.electrode_count()
 
     def set_callback_battery(self, callback: Union[Callable, None] = None) -> None:
-        self._manager.set_callback_battery(callback)
+        if callback is not None:
+            self._manager.set_callback_battery(callback)

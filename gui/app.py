@@ -32,6 +32,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.manager = None
+        self.connected_device_mac = None
         logging.basicConfig(level=logging.DEBUG)
 
         self.status_bar = UiStatusBar()
@@ -144,17 +145,29 @@ class MainWindow(QMainWindow):
         devices = self.bt_devices_manager.get_devices_info()
         logger.debug("GUI: update_devices_list - refresh controllers")
 
+        sdk_connected = False
+        if self.manager is not None:
+            try:
+                sdk_connected = self.manager.is_connected()
+            except Exception:
+                logger.exception("GUI: failed to read SDK connection state")
+
         for device in devices:
             logger.debug("GUI: device add %s", device.description)
 
-            item = QListWidgetItem(
-                f"{device.mac}    {device.description}    {device.connection_state}"
-            )
+            device_status = device.connection_state
+
+            if self.connected_device_mac == device.mac:
+                device_status = (
+                    ConnectionState.CONNECTED if sdk_connected else ConnectionState.DISCONNECTED
+                )
+
+            item = QListWidgetItem(f"{device.mac}    {device.description}    {device_status.value}")
             item.setData(
                 Qt.ItemDataRole.UserRole,
                 {
                     "mac": device.mac,
-                    "status": device.connection_state,
+                    "status": device_status,
                     "description": device.description,
                 },
             )
@@ -162,29 +175,48 @@ class MainWindow(QMainWindow):
                 {
                     "mac": device.mac,
                     "description": device.description,
-                    "status": device.connection_state,
+                    "status": device_status,
                 }
             )
             self.devices_list.addItem(item)
-            self.update_devices_radio_options_number()
+
+        self.update_devices_radio_options_number()
 
     def clear_devices_list(self):
         self.devices_list.clear()
+        self.bt_devices_info.clear()
+        self.remove_radio_options()
+        for button in self.devices_radio_buttons_group.buttons():
+            self.devices_radio_buttons_group.removeButton(button)
 
     def toggle_device_connection(self, item):
         metadata = item.data(Qt.ItemDataRole.UserRole)
-        if metadata:
-            status = metadata.get("status")
-            description = metadata.get("description")
-            if status == ConnectionState.CONNECTED:
+        if not metadata:
+            return
+
+        description = metadata.get("description")
+        mac = metadata.get("mac")
+
+        try:
+            if self.manager is None:
+                self.manager = EEGDeviceInterface(description, 0)
+
+            if self.manager.is_connected():
                 self.manager.disconnect()
+                self.connected_device_mac = None
                 self.status_bar.set_connection_status(False, self.manager)
             else:
-                self.manager = EEGDeviceInterface(description, 0)
                 self.manager.connect()
+                self.connected_device_mac = mac
                 self.status_bar.set_connection_status(True, self.manager)
 
-        self.update_devices_list()
+        except Exception as e:
+            logger.exception("GUI: toggle_device_connection failed: %s", e)
+            self.connected_device_mac = None
+            self.status_bar.set_connection_status(False, None)
+
+        finally:
+            self.update_devices_list()
 
     def device_radio_selected(self, button):
         self.cap_list.clear()
