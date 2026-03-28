@@ -13,17 +13,16 @@ To set up the development environment, run:
 poetry install
 poetry run pre-commit install
 ```
+Sometimes there could be missing QT dependencies problem. It could be resolved by:
+```bash
+sudo apt install libxcb-cursor0 libxkbcommon-x11-0
+```
 
 ---
 
 ## Requirements
 
 - `bluetoothctl` must be installed and available in your system.
-- The BrainAccess SDK must be available at such relative path:
-  ```
-  ../BrainAccessSDK-linux/python_api
-  ```
-  This path is referenced in `pyproject.toml` and used as a local dependency. Make sure the SDK is properly cloned or extracted there.
 
 ---
 
@@ -33,7 +32,7 @@ Before running any scripts using Poetry (e.g. GUI, test modules), you must first
 
 ```bash
 export PYTHONPATH=./
-poetry run some/path/to/file.py
+poetry run python some/path/to/file.py
 ```
 
 Alternatively, you can use a wrapper script or `make` task to automate this if needed.
