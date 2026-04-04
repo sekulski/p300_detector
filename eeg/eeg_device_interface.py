@@ -30,13 +30,13 @@ class EEGDeviceInterface:
         self._device_name = device_name
         self._adapter_number = adapter_number
         self._device_features = DeviceFeatures()
-        self._eeg_data_recorder = EEGDataRecorder()
+        self._eeg_data_recorder = None
         self._eeg_data_ready = False
         self._lock = threading.Lock()
         self._scanned_devices = []
 
     def close(self):
-        print("Device will be disconnect")
+        print("Device will be disconnected")
         self.disconnect()
         time.sleep(1)  # TODO: Nasty workaround to allow BLE callbacks to finish before shutdown
         core.close()
@@ -134,8 +134,12 @@ class EEGDeviceInterface:
         if not self._manager.is_streaming():
             self._disable_all_channels()
             self._enable_all_channels()
+            self._update_device_features()
             print("Manager not started, so it will be.")
-            self._eeg_data_recorder.set_sampling_rate(self.get_sample_frequency())
+            self._eeg_data_recorder = EEGDataRecorder(
+                sampling_rate=self.get_sample_frequency(),
+                channels=self._device_features.electrode_count,
+            )
             print("Sampling rate was set")
             self._manager.set_callback_chunk(self._eeg_data_recorder.process_chunk)
 
