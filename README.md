@@ -1,5 +1,7 @@
 # EEG Project with BrainAccess SDK
 
+Moja bardzo ważna zamina :)
+
 This project provides tools and a GUI interface to work with EEG data using the BrainAccess SDK. 
 It uses PyQt6 for the interface, and integrates various utilities for signal processing and development workflows.
 
