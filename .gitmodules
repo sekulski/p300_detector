@@ -1,4 +1,4 @@
 [submodule "external/BrainAccessSdk"]
 	path = external/BrainAccessSdk
-	url = git@github.com:NeuroRippers/BrainAccessSdk.git
+	url = https://github.com/NeuroRippers/BrainAccessSdk.git
 	ignore = dirty
