@@ -16,7 +16,10 @@ default_mini: dict = {
 }
 
 # Initialize device interface. Adapter no == 1, because there was external adapter used
-manager = EEGDeviceInterface("BA MINI 002", 1)
+default_cap = Cap(
+    cap_map=default_mini, cap_type=CapType.BA_MINI, config_name="BA MINI - All electrodes"
+)
+manager = EEGDeviceInterface("BA MINI 002", 1, default_cap)
 
 try:
     print("Connecting to device...\n")
@@ -42,7 +45,6 @@ try:
     print(f"\tIs Charger Connected: {battery.is_charger_connected}\n")
 
     # Check cap compatibility
-    default_cap = Cap(default_mini, CapType.BA_MINI, "BA MINI - All electrodes")
     print(f"Electrode cap compatibility: {manager.electrode_count_matches_cap(default_cap)}\n")
 
     # Start eeg data streaming
@@ -54,7 +56,8 @@ try:
     sleep(20)
     # while not manager.is_stream_data_ready():
     #     sleep(1)
-    manager.save_stream_to_file("/tmp/output.csv")
+    manager.save_stream_to_csv("/tmp/output.csv")
+    manager.save_stream_to_edf("/tmp/output.edf")
     print("EEG stream saved to file")
 
 finally:

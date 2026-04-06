@@ -22,21 +22,22 @@ class EEGDeviceInterfaceError(Exception):
 
 
 class EEGDeviceInterface:
-    def __init__(self, device_name: str, adapter_number: int):
+    def __init__(self, device_name: str, adapter_number: int, cap: Cap):
         core.init()
         core.config_set_adapter_index(adapter_number)
 
         self._manager = EEGManager()
         self._device_name = device_name
         self._adapter_number = adapter_number
+        self._cap_mapping = cap
         self._device_features = DeviceFeatures()
-        self._eeg_data_recorder = EEGDataRecorder()
+        self._eeg_data_recorder = None
         self._eeg_data_ready = False
         self._lock = threading.Lock()
         self._scanned_devices = []
 
     def close(self):
-        print("Device will be disconnect")
+        print("Device will be disconnected")
         self.disconnect()
         time.sleep(1)  # TODO: Nasty workaround to allow BLE callbacks to finish before shutdown
         core.close()
@@ -134,8 +135,14 @@ class EEGDeviceInterface:
         if not self._manager.is_streaming():
             self._disable_all_channels()
             self._enable_all_channels()
+            self._update_device_features()
             print("Manager not started, so it will be.")
-            self._eeg_data_recorder.set_sampling_rate(self.get_sample_frequency())
+            self._eeg_data_recorder = EEGDataRecorder(
+                sampling_rate=self.get_sample_frequency(),
+                seconds=60,
+                channels=self._device_features.electrode_count,
+                cap=self._cap_mapping,
+            )
             print("Sampling rate was set")
             self._manager.set_callback_chunk(self._eeg_data_recorder.process_chunk)
 
@@ -155,10 +162,17 @@ class EEGDeviceInterface:
         else:
             print("Manager is not streaming yet")
 
-    def save_stream_to_file(self, path: str) -> None:
+    def save_stream_to_csv(self, path: str) -> None:
         if self._eeg_data_ready:
             print(f"Stream will be saved to the: {path}")
             self._eeg_data_recorder.save_to_csv(path)
+        else:
+            print("EEG data not ready yet.")
+
+    def save_stream_to_edf(self, path: str) -> None:
+        if self._eeg_data_ready:
+            print(f"Stream will be saved to the: {path}")
+            self._eeg_data_recorder.save_to_edf(path)
         else:
             print("EEG data not ready yet.")
 

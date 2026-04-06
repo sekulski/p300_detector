@@ -12,11 +12,11 @@ _default_mini: dict = {
 }
 
 _dummy_smr_theta: dict = {
-    3: "C4", # Active
+    3: "C4",  # Active
 }
 
 _dummy_beta_theta: dict = {
-    2: "C3", # Active
+    2: "C3",  # Active
 }
 
 
@@ -29,12 +29,18 @@ class CapType(StrEnum):
 
 
 class Cap:
-    def __init__(self, cap_map: dict, cap_type: StrEnum, device_name: str):
+    def __init__(self, cap_map: dict, cap_type: StrEnum, config_name: str):
         self.mapping = cap_map
         self.cap_type = cap_type
-        self.name = device_name
+        self.config_name = config_name
 
-eeg_caps = [ Cap(_default_mini, CapType.BA_MINI, "BA MINI - All electrodes"),
-             Cap(_dummy_smr_theta, CapType.BA_MINI, "BA MINI - SMR/Theta"),
-             Cap(_dummy_beta_theta, CapType.BA_MINI, "BA MINI - Beta/Theta"),
-             Cap(_default_mini, CapType.UNKNOWN, "OpenBci - Gamma")]
+    def get_electrode_list(self):
+        return list(self.mapping.values())
+
+
+eeg_caps = [
+    Cap(_default_mini, CapType.BA_MINI, "BA MINI - All electrodes"),
+    Cap(_dummy_smr_theta, CapType.BA_MINI, "BA MINI - SMR/Theta"),
+    Cap(_dummy_beta_theta, CapType.BA_MINI, "BA MINI - Beta/Theta"),
+    Cap(_default_mini, CapType.UNKNOWN, "OpenBci - Gamma"),
+]
