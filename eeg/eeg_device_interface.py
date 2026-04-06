@@ -22,13 +22,14 @@ class EEGDeviceInterfaceError(Exception):
 
 
 class EEGDeviceInterface:
-    def __init__(self, device_name: str, adapter_number: int):
+    def __init__(self, device_name: str, adapter_number: int, cap: Cap):
         core.init()
         core.config_set_adapter_index(adapter_number)
 
         self._manager = EEGManager()
         self._device_name = device_name
         self._adapter_number = adapter_number
+        self._cap_mapping = cap
         self._device_features = DeviceFeatures()
         self._eeg_data_recorder = None
         self._eeg_data_ready = False
@@ -138,7 +139,9 @@ class EEGDeviceInterface:
             print("Manager not started, so it will be.")
             self._eeg_data_recorder = EEGDataRecorder(
                 sampling_rate=self.get_sample_frequency(),
+                seconds=60,
                 channels=self._device_features.electrode_count,
+                cap=self._cap_mapping,
             )
             print("Sampling rate was set")
             self._manager.set_callback_chunk(self._eeg_data_recorder.process_chunk)
@@ -159,10 +162,17 @@ class EEGDeviceInterface:
         else:
             print("Manager is not streaming yet")
 
-    def save_stream_to_file(self, path: str) -> None:
+    def save_stream_to_csv(self, path: str) -> None:
         if self._eeg_data_ready:
             print(f"Stream will be saved to the: {path}")
             self._eeg_data_recorder.save_to_csv(path)
+        else:
+            print("EEG data not ready yet.")
+
+    def save_stream_to_edf(self, path: str) -> None:
+        if self._eeg_data_ready:
+            print(f"Stream will be saved to the: {path}")
+            self._eeg_data_recorder.save_to_edf(path)
         else:
             print("EEG data not ready yet.")
 
